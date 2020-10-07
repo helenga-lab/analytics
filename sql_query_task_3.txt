@@ -1,0 +1,43 @@
+SELECT purchase_date, purchase_id, client_id, 
+    client_age, client_registration_age, client_city, 
+    city, client_category, promotion_name, 
+    category_name, partner_name, revenue, quantity
+FROM
+
+ (SELECT purchase_date, purchase_id, client_id, 
+ city, client_category, promotion_name, category_name, partner_name, revenue, quantity
+ FROM
+    (SELECT revenue, purchase_id, promotion_id, purchase_date, 
+    client_id, city_id, 
+    (CASE WHEN purchase_date = start THEN 'new' else 'old' end) AS client_category, quantity --создаем поле категории по условию является ли покупка первой
+    FROM
+        (SELECT price*quantity AS revenue, --вычисляем выручку
+        purchase_id, toDate(parseDateTimeBestEffortOrNull(purchase_date)) as purchase_date, 
+        client_id, city_id, promotion_id, quantity, status
+        FROM purchase
+        WHERE (purchase_date BETWEEN '2020-05-01' AND '2020-08-01') AND status = 1) as l --задаем условие на дату и статус покупки
+        LEFT JOIN
+        (SELECT MIN(toDate(parseDateTimeBestEffortOrNull(purchase_date))) as start, client_id --вычисляем дату первой покупки покупателя
+        FROM purchase
+        GROUP BY client_id) as r
+        ON l.client_id = r.client_id) as l
+    
+    LEFT JOIN 
+    city as s
+    ON l.city_id = s.city_id
+    LEFT JOIN
+    promotion as r
+    ON l.promotion_id = r.promotion_id) as l
+LEFT JOIN
+(SELECT client_age, client_registration_age, client_id, client_city
+FROM
+    (SELECT 
+    (toYear(today()) - toYear(parseDateTimeBestEffortOrNull(birth_date))) as client_age, --создаем поле возраста покупателя на текущий день
+    dateDiff('month', toDate(parseDateTimeBestEffortOrNull(registration)), today()) as client_registration_age, --вычисляем время использования сервиса
+    client_id, client_city_id
+    FROM client) as l
+    JOIN
+    city as r
+    ON l.client_city_id = r.client_city_id) as r
+    ON l.client_id = r.client_id
+
