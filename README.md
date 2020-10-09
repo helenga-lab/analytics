@@ -17,7 +17,7 @@
 Задача: Проанализировать динамику заказов магазина, а также возможность составления прогноза заказов на ближайшие 3 месяца
 
 Задание выполнено в Jupyter Notebook на Python с использованием библиотек pandas, numpy, sklearn, plotly
-
+Ссылка для просмотра результата выполнения задания с графиками plotly - https://nbviewer.jupyter.org/github/helenga-lab/analytics/blob/cabf8c202f39a0878bd53cbf9143cbd5884a778e/Orders_forecast.ipynb
 
 Выводы:
 
